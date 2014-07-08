@@ -1,0 +1,25 @@
+import os
+import tempfile
+from keyfile.keyfile import *
+from filecrypt.ALL_filecrypt import *
+
+class CryptHandler(object):
+
+    def __init__(self):
+        return
+
+    def Encrypt(self, LocalPath, EncryptMode):
+        key = make_key()
+        handle, path = tempfile.mkstemp()
+        print handle #file handle
+        print path #file path
+
+        if (os.path.exists(handle_path_tuple[1]) == False):
+            print "ERROR: CryptHandler.Encrypt could not create temp file"
+            return ""
+
+        
+
+        
+        
+        

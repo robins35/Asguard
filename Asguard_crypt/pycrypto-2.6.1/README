@@ -1,0 +1,232 @@
+Python Cryptography Toolkit (pycrypto)
+======================================
+
+This is a collection of both secure hash functions (such as SHA256 and
+RIPEMD160), and various encryption algorithms (AES, DES, RSA, ElGamal,
+etc.).  The package is structured to make adding new modules easy.
+This section is essentially complete, and the software interface will
+almost certainly not change in an incompatible way in the future; all
+that remains to be done is to fix any bugs that show up.  If you
+encounter a bug, please report it in the Launchpad bug tracker at
+
+       https://launchpad.net/products/pycrypto/+bugs
+
+An example usage of the SHA256 module is:
+>>> from Crypto.Hash import SHA256
+>>> hash = SHA256.new()
+>>> hash.update('message')
+>>> hash.digest()
+'\xabS\n\x13\xe4Y\x14\x98+y\xf9\xb7\xe3\xfb\xa9\x94\xcf\xd1\xf3\xfb"\xf7\x1c\xea\x1a\xfb\xf0+F\x0cm\x1d'
+
+An example usage of an encryption algorithm (AES, in this case) is:
+
+>>> from Crypto.Cipher import AES
+>>> obj = AES.new('This is a key456', AES.MODE_ECB)
+>>> message = "The answer is no"
+>>> ciphertext = obj.encrypt(message)
+>>> ciphertext
+'o\x1aq_{P+\xd0\x07\xce\x89\xd1=M\x989'
+>>> obj2 = AES.new('This is a key456', AES.MODE_ECB)
+>>> obj2.decrypt(ciphertext)
+'The answer is no'
+
+One possible application of the modules is writing secure
+administration tools.  Another application is in writing daemons and
+servers.  Clients and servers can encrypt the data being exchanged and
+mutually authenticate themselves; daemons can encrypt private data for
+added security.  Python also provides a pleasant framework for
+prototyping and experimentation with cryptographic algorithms; thanks
+to its arbitrary-length integers, public key algorithms are easily
+implemented.
+
+As of PyCrypto 2.1.0, PyCrypto provides an easy-to-use random number
+generator:
+
+>>> from Crypto import Random
+>>> rndfile = Random.new()
+>>> rndfile.read(16)
+'\xf7.\x838{\x85\xa0\xd3>#}\xc6\xc2jJU'
+
+A stronger version of Python's standard "random" module is also
+provided:
+
+>>> from Crypto.Random import random
+>>> random.choice(['dogs', 'cats', 'bears'])
+'bears'
+
+Caveat: For the random number generator to work correctly, you must
+call Random.atfork() in both the parent and child processes after
+using os.fork()
+
+
+Installation
+============
+
+PyCrypto is written and tested using Python version 2.1 through 3.2.  Python
+1.5.2 is not supported.
+
+The modules are packaged using the Distutils, so you can simply run
+"python setup.py build" to build the package, and "python setup.py
+install" to install it.
+
+If the setup.py script crashes with a DistutilsPlatformError
+complaining that the file /usr/lib/python2.2/config/Makefile doesn't
+exist, this means that the files needed for compiling new Python
+modules aren't installed on your system.  Red Hat users often run into
+this because they don't have the python2-devel RPM installed.  The fix
+is to simply install the requisite RPM.  On Debian/Ubuntu, you need the
+python-dev package.
+
+To verify that everything is in order, run "python setup.py test".  It
+will test all the cryptographic modules, skipping ones that aren't
+available.  If the test script reports an error on your machine,
+please report the bug using the bug tracker (URL given above).  If
+possible, track down the bug and include a patch that fixes it,
+provided that you are able to meet the eligibility requirements at
+http://www.pycrypto.org/submission-requirements/.
+
+It is possible to test a single sub-package or a single module only, for instance
+when you investigate why certain tests fail and don't want to run the whole
+suite each time. Use "python setup.py test --module=name", where 'name'
+is either a sub-package (Cipher, PublicKey, etc) or a module (Cipher.DES,
+PublicKey.RSA, etc).
+To further cut test coverage, pass also the option "--skip-slow-tests".
+
+To install the package under the site-packages directory of
+your Python installation, run "python setup.py install".
+
+If you have any comments, corrections, or improvements for this
+package, please report them to our mailing list, accessible via the
+PyCrypto website:
+
+    http://www.pycrypto.org/
+    
+Included encryption algorithms
+==============================
+
+AES: 
+	AES `(Advanced Encryption Standard)`__ is a symmetric block cipher standardized
+	by NIST_ . It has a fixed data block size of 16 bytes.
+	Its keys can be 128, 192, or 256 bits long.
+
+	AES is very fast and secure, and it is the de facto standard for symmetric
+	encryption.
+ARC2:
+	RC2_ (Rivest's Cipher version 2)  is a symmetric block cipher designed
+	by Ron Rivest in 1987. The cipher started as a proprietary design,
+	that was reverse engineered and anonymously posted on Usenet in 1996.
+	For this reason, the algorithm was first called *Alleged* RC2 (ARC2),
+	since the company that owned RC2 (RSA Data Inc.) did not confirm whether
+	the details leaked into public domain were really correct.
+
+	The company eventually published its full specification in RFC2268_.
+
+	RC2 has a fixed data block size of 8 bytes. Length of its keys can vary from
+	8 to 128 bits. One particular property of RC2 is that the actual
+	cryptographic strength of the key (*effective key length*) can be reduced 
+	via a parameter.
+
+	Even though RC2 is not cryptographically broken, it has not been analyzed as
+	thoroughly as AES, which is also faster than RC2.
+
+	New designs should not use RC2.
+
+ARC4: 
+	ARC4_ (Alleged RC4) is an implementation of RC4 (Rivest's Cipher version 4),
+	a symmetric stream cipher designed by Ron Rivest in 1987.
+
+	The cipher started as a proprietary design, that was reverse engineered and
+	anonymously posted on Usenet in 1994. The company that owns RC4 (RSA Data
+	Inc.) never confirmed the correctness of the leaked algorithm.
+
+	Unlike RC2, the company has never published the full specification of RC4,
+	of whom it still holds the trademark.
+
+	ARC4 keys can vary in length from 40 to 2048 bits.
+
+	One problem of ARC4 is that it does not take a nonce or an IV. If it is required
+	to encrypt multiple messages with the same long-term key, a distinct
+	independent nonce must be created for each message, and a short-term key must
+	be derived from the combination of the long-term key and the nonce.
+	Due to the weak key scheduling algorithm of RC2, the combination must be carried
+	out with a complex function (e.g. a cryptographic hash) and not by simply
+	concatenating key and nonce.
+
+	New designs should not use ARC4. A good alternative is AES
+	(`Crypto.Cipher.AES`) in any of the modes that turn it into a stream cipher (OFB, CFB, or CTR).
+Blowfish:
+	Blowfish_ is a symmetric block cipher designed by Bruce Schneier.
+
+	It has a fixed data block size of 8 bytes and its keys can vary in length
+	from 32 to 448 bits (4 to 56 bytes).
+
+	Blowfish is deemed secure and it is fast. However, its keys should be chosen
+	to be big enough to withstand a brute force attack (e.g. at least 16 bytes).
+CAST:
+	CAST-128_ (or CAST5) is a symmetric block cipher specified in RFC2144_.
+
+	It has a fixed data block size of 8 bytes. Its key can vary in length
+	from 40 to 128 bits.
+
+	CAST is deemed to be cryptographically secure, but its usage is not widespread.
+	Keys of sufficient length should be used to prevent brute force attacks
+	(128 bits are recommended). 
+DES:
+	DES `(Data Encryption Standard)`__ is a symmetric block cipher standardized
+	by NIST_ . It has a fixed data block size of 8 bytes.
+	Its keys are 64 bits long, even though 8 bits were used for integrity (now they
+	are ignored) and do not contribute to securty.
+
+	DES is cryptographically secure, but its key length is too short by nowadays
+	standards and it could be brute forced with some effort.
+
+	DES should not be used for new designs. Use `AES`.
+DES3: 
+	`Triple DES`__ (or TDES or TDEA or 3DES) is a symmetric block cipher standardized by NIST_.
+	It has a fixed data block size of 8 bytes. Its keys are 128 (*Option 1*) or 192
+	bits (*Option 2*) long.
+	However, 1 out of 8 bits is used for redundancy and do not contribute to
+	security. The effective key length is respectively 112 or 168 bits.
+
+	TDES consists of the concatenation of 3 simple `DES` ciphers.
+
+	The plaintext is first DES encrypted with *K1*, then decrypted with *K2*,
+	and finally encrypted again with *K3*.  The ciphertext is decrypted in the reverse manner.
+
+	The 192 bit key is a bundle of three 64 bit independent subkeys: *K1*, *K2*, and *K3*.
+
+	The 128 bit key is split into *K1* and *K2*, whereas *K1=K3*.
+
+	It is important that all subkeys are different, otherwise TDES would degrade to
+	single `DES`.
+
+	TDES is cryptographically secure, even though it is neither as secure nor as fast
+	as `AES`.
+XOR:
+	XOR is one the simplest stream ciphers. Encryption and decryption are
+	performed by XOR-ing data with a keystream made by contatenating
+	the key.
+
+	Do not use it for real applications!
+	
+
+Included hash algorithms
+========================
+
+HMAC:
+	HMAC is a MAC defined in RFC2104_ and FIPS-198_ and constructed using
+	a cryptograpic hash algorithm.
+	It is usually named *HMAC-X*, where *X* is the hash algorithm; for
+	instance *HMAC-SHA1* or *HMAC-MD5*.
+
+	The strength of an HMAC depends on:
+
+	 - the strength of the hash algorithm
+	 - the length and entropy of the secret key
+
+MD family (versions 2,4,and 5):
+	MD stands for Message Digest
+
+RIPEMD:
+
+SHA family hashes (1, 224, 256, 384, 512):	

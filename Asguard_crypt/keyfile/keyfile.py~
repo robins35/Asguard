@@ -1,0 +1,85 @@
+import random, os, string, hashlib, time, sys
+import ConfigParser
+
+
+def make_key():
+
+	password= ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for x in range(16))
+	key = hashlib.sha256(password).digest()
+	return key
+	
+def add_entry (name, alg, key):
+
+	adder=ConfigParser.RawConfigParser()
+	
+	creation= time.asctime( time.localtime(time.time()) )
+#	update_filecount()
+	sectid=random.randint(0,sys.maxint)
+	sectname= "ENTRY: " + str(sectid)
+	
+	adder.add_section(sectname)
+	adder.set(sectname, "FILE", name)
+	adder.set(sectname, "ALGORITHM", alg)
+	adder.set(sectname, "KEY", key)
+	adder.set(sectname, "CREATED", creation)
+	adder.set(sectname, "UPDATE", creation)
+	
+	with open("keyfile.ini", "a") as keyfile:
+		adder.write(keyfile)
+#	close(keyfile)
+		
+def read_keyfile(keys):
+
+	reader=ConfigParser.RawConfigParser()
+	reader.read("keyfile.ini")
+	sections= reader.sections()
+
+	for x in sections:
+		name= reader.get(x,"FILE")
+		alg= reader.get(x,"ALGORITHM")
+		key= reader.get(x,"KEY")
+		i= [alg, key]
+		keys[name]= i
+	
+	return keys
+	
+
+def create_keyfile():
+	
+		creator=ConfigParser.RawConfigParser()
+		
+#	 	creator.add_section("HEAD")
+#	 	creator.set("HEAD", "USER", user)
+#	 	creator.set("HEAD", "PUBLIC URI", uri_Pub)
+#	 	creator.set("HEAD", "PRIVATE URI", uri_Pri)
+#	 	creator.set("HEAD", "KEY", key)
+#	 	creator.set("HEAD", "FILE_COUNT", 0)
+	 	
+	 	with open("keyfile.ini", "wb") as keyfile:
+			creator.write(keyfile)
+
+def read_HEAD():
+
+	reader=ConfigParser.RawConfigParser()
+	reader.read("keyfile.ini")
+	
+	user= reader.get("HEAD", "USER")
+	public= reader.get("HEAD", "PUBLIC URI")
+	private= reader.get("HEAD", "PRIVATE URI")
+	key= reader.get("HEAD", "KEY")
+	fnum= reader.get("HEAD", "FILE_COUNT")
+	
+	print(user)
+	print(public)
+	print(private)
+	print(key)
+	print(fnum)
+	
+def update_fileCount():
+
+	reader=ConfigParser.RawConfigParser()
+	config.read("keyfile.ini")
+	fcount=reader.getint("HEAD","FILE_COUNT")
+	
+	updater=ConfigParser.RawConfigParser()
+	updater.set("HEAD","FILE_COUNT", fcount + 1)	
